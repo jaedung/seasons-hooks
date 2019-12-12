@@ -1,55 +1,33 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import SeasonDisplay from "./SeasonDisplay";
 import Spinner from "./Spinner";
-// const App = () => {
-//   window.navigator.geolocation.getCurrentPosition(
-//     position => console.log(position),
-//     error => console.log(error)
-//   );
 
-//   return <div>Hi there!</div>;
-// };
+const App = () => {
+  const [lat, setLat] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
-class App extends React.Component {
-  // constructor(props) {
-  //   super(props);
-
-  //   // THIS IS THE ONLY TIME we do direct assignment to this.state
-  //   this.state = {
-  //     lat: null,
-  //     errorMessage: ""
-  //   };
-  // }
-
-  state = { lat: null, errorMessage: "" };
-
-  componentDidMount() {
+  useEffect(() => {
     window.navigator.geolocation.getCurrentPosition(
-      position => this.setState({ lat: position.coords.latitude }),
-      error => this.setState({ errorMessage: error.message })
+      position => setLat(position.coords.latitude),
+      error => setErrorMessage(error.message)
     );
+  }, []);
+
+  let content;
+
+  if (errorMessage !== "" && lat === null) {
+    content = <div>Error: {errorMessage}</div>;
   }
 
-  componentDidUpdate() {
-    console.log("componentDidUpdate");
+  if (errorMessage === "" && lat !== null) {
+    content = <SeasonDisplay lat={lat} />;
   }
 
-  renderContent = () => {
-    if (this.state.errorMessage !== "" && this.state.lat === null) {
-      return <div>Error: {this.state.errorMessage}</div>;
-    }
-
-    if (this.state.errorMessage === "" && this.state.lat !== null) {
-      return <SeasonDisplay lat={this.state.lat} />;
-    }
-
-    return <Spinner message="Please accept location request" />;
-  };
-
-  // React says we have to define render!!
-  render() {
-    return <div className="border red">{this.renderContent()}</div>;
+  if (errorMessage === "" && lat === null) {
+    content = <Spinner message="Please accept location request" />;
   }
-}
+
+  return <div className="border red">{content}</div>;
+};
 
 export default App;
